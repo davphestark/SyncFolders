@@ -9,8 +9,26 @@ namespace SyncFolders
         public string LogFile { get; set; }
         public DateTime logStart { get; set; }
         public DateTime logEnd { get; set; }
+        public long fileCount { get; set; }
+        public long copyCount { get; set; }
+        public long updateCount { get; set; }
+        public long dirCount { get; set; }
+        public long deleteDirCount { get; set; }
+        public long equalCount { get; set; }
+        public long diffLengthCount { get; set; }
+        public long sameDateModCount { get; set; }
+        public long diffBtyeCount { get; set; }
         public Log(string dir)
         {
+            fileCount = 0;
+            copyCount = 0;
+            updateCount = 0;
+            dirCount = 0;
+            deleteDirCount = 0;
+            equalCount = 0;
+            diffLengthCount = 0;
+            sameDateModCount = 0;
+            diffBtyeCount = 0;
             logStart = DateTime.Now;
             LogFile = Path.Combine(dir, "syncLog" + logStart.ToString("yyyyMMddHHmmss") + ".txt");
             startLog();
@@ -31,11 +49,11 @@ namespace SyncFolders
             var sectionEnd = DateTime.Now;
             logMsg(msg + "in: " + FormatTimeSpan(sectionEnd - logStart));
         }
-        public void endLog(long fileCount, long copyCount, long updateCount, long dirCount, long deleteDirCount, long equalCount, long sameLengthCount, long sameDateModCount, long diffBtyeCount)
+        public void endLog()
         {
             logEnd = DateTime.Now;
             logMsg(string.Format($"----- { fileCount.ToString()} files in {dirCount.ToString()} directories reviewed ---"));
-            logMsg(string.Format($"----- { equalCount.ToString()} files checked for changes, {sameLengthCount.ToString()} different lengths,  {sameDateModCount.ToString()} same DateMod and {(sameLengthCount + diffBtyeCount).ToString()} different files  ---"));
+            logMsg(string.Format($"----- { equalCount.ToString()} files checked for changes, {diffLengthCount.ToString()} different lengths,  {sameDateModCount.ToString()} same DateMod and {(diffLengthCount + diffBtyeCount).ToString()} different files  ---"));
             logMsg(string.Format($"----- {copyCount.ToString()} files copied, {updateCount.ToString()} files updated, {deleteDirCount.ToString()} directories deleted in {FormatTimeSpan(logEnd - logStart)} ---"));
             logMsg("-----End Sync: " + logEnd.ToString("F", CultureInfo.CreateSpecificCulture("en-US")) + "---");
         }

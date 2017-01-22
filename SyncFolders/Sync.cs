@@ -11,28 +11,11 @@ namespace SyncFolders
         public bool logOnly { get; set; }
         public bool bothWays { get; set; }
         public Log log { get; set; }
-        public long fileCount { get; set; }
-        public long copyCount { get; set; }
-        public long updateCount { get; set; }
-        public long dirCount { get; set; }
-        public long deleteDirCount { get; set; }
-        public long equalCount { get; set; }
-        public long diffLengthCount { get; set; }
-        public long sameDateModCount { get; set; }
-        public long diffBtyeCount { get; set; }
+        
         public Sync()
         {
             logOnly = true;
             bothWays = false;
-            fileCount = 0;
-            copyCount = 0;
-            updateCount = 0;
-            dirCount = 0;
-            deleteDirCount = 0;
-            equalCount = 0;
-            diffLengthCount = 0;
-            sameDateModCount = 0;
-            diffBtyeCount = 0;
         }
         public Sync(string path1, string path2, bool isLog, bool bothWays) : this()
         {
@@ -48,7 +31,7 @@ namespace SyncFolders
             {
                 log = new Log(startPath);
                 startCopy();
-                log.endLog(fileCount, copyCount, updateCount, dirCount, deleteDirCount, equalCount, diffLengthCount ,sameDateModCount ,diffBtyeCount);
+                log.endLog();
                 return true;
             }
             catch (Exception e)
@@ -120,7 +103,7 @@ namespace SyncFolders
                                         File.Copy(startFile, copyDir + startFile.Substring(dir.Length), true);
                                         Console.Write(".");
                                     }
-                                    updateCount++;
+                                    log.updateCount++;
                                     log.logMsg(String.Format("{0} newer, copied to folder: {1}", startFile, copyDir + startFile.Substring(dir.Length)));
                                 }
                             }
@@ -130,10 +113,10 @@ namespace SyncFolders
                                 File.Copy(startFile, copyDir + startFile.Substring(dir.Length));
                                 Console.Write(".");
                             }
-                            copyCount++;
+                            log.copyCount++;
                             log.logMsg(String.Format("{0}, copied to folder: {1}", startFile, copyDir + startFile.Substring(dir.Length)));
                         }
-                        fileCount++;
+                        log.fileCount++;
                     }
                 }
                 foreach (string startDir in Directory.GetDirectories(dir)) {
@@ -145,7 +128,7 @@ namespace SyncFolders
                             log.logMsg(String.Format("unabled to create folder: {0} {1}", copyDir + startDir.Substring(dir.Length), e.Message));
                         }
                     }
-                    dirCount++;
+                    log.dirCount++;
                     ProcessFiles(startDir, copyDir + startDir.Substring(dir.Length));
                 }
             }
@@ -180,7 +163,7 @@ namespace SyncFolders
                         {
                             Directory.Delete(dir);
                         }
-                        deleteDirCount++;
+                        log.deleteDirCount++;
                         log.logMsg(String.Format("Deleted blank folder: {0}", dir));
                     }
                     catch (UnauthorizedAccessException) { }
@@ -197,15 +180,15 @@ namespace SyncFolders
         private const int BYTES_TO_READ = sizeof(Int64);
         private bool FilesAreEqual(FileInfo first, FileInfo second)
         {
-            equalCount++;
+            log.equalCount++;
             if (first.Length != second.Length)
             {
-                diffLengthCount++;
+                log.diffLengthCount++;
                 return false;
             }
             if (first.LastWriteTime == second.LastWriteTime)
             {
-                sameDateModCount++;
+                log.sameDateModCount++;
                 return true;
             }
 
@@ -223,7 +206,7 @@ namespace SyncFolders
 
                     if (BitConverter.ToInt64(one, 0) != BitConverter.ToInt64(two, 0))
                     {
-                        diffBtyeCount++;
+                        log.diffBtyeCount++;
                         return false;
                     }
                 }
